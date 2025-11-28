@@ -1,8 +1,48 @@
 <?php
+session_start();
+
+$email = $password = "";
+$emailerror = $passerror = "";
+$emailnotregister = $passnotregister = $invalid = "";
+
+
+
+if(isset($_POST["login"])){
+
+    $useremail = $_POST["email"];
+    $userpassword = $_POST["password"];
+
+    if(empty($useremail)){
+        $emailerror = "Empty Email";
+    }
+    elseif(empty($userpassword)){
+        $passerror = "Empty password";
+    }
+    elseif(empty($_SESSION["email"])){
+        $emailnotregister =  "No email register";
+    }
+    elseif (empty($_SESSION["createpassword"])){
+        $passnotregister = "no password register";
+    }
+
+    elseif($useremail ==  $_SESSION["email"] && $userpassword  == $_SESSION["createpassword"]) {
+      
+         if($_SESSION["usertype"] == 0){
+            header("location: index.php");
+        }
+         elseif($_SESSION["usertype"] == 1){
+            header("location: ./adminFolder/dashboard.php");
+    }
+  }
+else{
+    $invalid = "Username invalid ";
+}
+
+}
+
 
 
 ?>
-
 
 
 <!DOCTYPE html>
@@ -28,6 +68,7 @@
         }
 
       .form-container{
+            
             justify-items: center;
             width: 400px;
             height: 600px;
@@ -39,8 +80,8 @@
       } 
 
         h6{
-            margin-top: 105px;
-            margin-bottom: 50px;
+            margin-top: 10px;
+            margin-bottom: 20px;
         }
         p{
             text-align: center;
@@ -70,6 +111,16 @@
             background-color: rgb(0, 0, 0);
             color: rgb(255, 255, 255);
         }
+        img{
+            width: 120px;
+            height: 100px;
+            border: 1px solid black;
+            border-radius: 100px;
+            margin-left: 140px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+           
+        }
 
     </style>
 
@@ -80,6 +131,7 @@
   <div class="flex">
 
      <div class="form-container">
+         <img src="/Images/logo.jpg" alt="logo">
         <h6>Integrated School Management System</h6>
         <form action="">
 

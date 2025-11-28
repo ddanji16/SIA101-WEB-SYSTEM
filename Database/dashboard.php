@@ -1,3 +1,7 @@
+
+<?php include_once("../Database/connection.php"); ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +10,6 @@
     <title>Dashboard</title>
 </head>
 <body>
-    
+    <h2>22</h2>
 </body>
 </html>
