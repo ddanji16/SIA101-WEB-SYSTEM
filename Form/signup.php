@@ -1,81 +1,169 @@
 <?php
 
+include_once("../Database/connection.php");
 session_start();  
 
-$name = $email = $createpassword = $confirmpassword = $usertype = "";
-$namerror = $emailerror = $passworderror = $passnotmatch = "";
+$name = $lastname = $email = $pass = $confirmpass = $usertype = "";
+$namerror = $lastnameerror =  $emailerror = $passworderror = $passnotmatch = "";
+$dberror = "";
 
-if(isset($_POST["register"])){
 
 
-    if(empty($_POST["name"])) {     
-        $namerror = " Empty  name";      
-       
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["btn-create"])) {
+
+
+    $name = trim($_POST['name'] ?? '');
+
+    $lastname = trim($_POST['lastname'] ?? '');
+
+    $email = trim($_POST['email'] ?? '');
+
+    $pass = $_POST['pass'] ?? '';
+
+    $confirmpass = $_POST['confirmpass'] ?? '';
+
+    $usertype = $_POST['usertype'] ?? '';
+
+    $hasError = false;
+
+
+
+
+
+    if ($name === '') {
+        $namerror = 'Empty name';
+        $hasError = true;
     }
-    elseif(empty($_POST["email"])){
-        $emailerror = " Empty  Email";  
+
+    if ($lastname === '') {
+        $lastnameerror = 'Empty last name';
+        $hasError = true;
     }
-    elseif (empty($_POST["createpassword"])){
-        $passworderror = "incomplete Empty password";
-    }
 
-    elseif(empty($_POST["confirmpassword"])){
-        $passworderror = "incomplete Empty password";
-    }
-    elseif(!empty($_POST["name"]) &&  !empty($_POST["email"]) &&  !empty($_POST["createpassword"]) && !empty($_POST["confirmpassword"])){
-       
-
-        if($_POST["createpassword"] == $_POST["confirmpassword"]){
-
-        $name =   $_POST["name"];
-        $email = $_POST["email"];
-        $createpassword =  $_POST["createpassword"];
-        $confirmpassword =   $_POST["confirmpassword"];
-        $usertype = $_POST["usertype"];
-
-        
-        $_SESSION['name']= $name;
-        $_SESSION['email']= $email;
-        $_SESSION['createpassword']= $createpassword;
-        $_SESSION['confirmpassword']= $confirmpassword;
-        $_SESSION['usertype']= $usertype;
-
-        $server = "localhost";
-        $username = "root";
-        $password = "";
-        $db_name = "catbadb";
-        $con = "";
-
-
-        $con = mysqli_connect($server, $username, $password, $db_name);
-
-      
-        $quary = "INSERT INTO catba (names,email, createpassword, confirmpassword, usertype)VALUE('$name','$email', '$createpassword', '$confirmpassword',  '$usertype')";
-        $quary_run = mysqli_query($con, $quary);
-
-        if($quary_run){
-            header("location: loginForm.php");
-        }
-        else{
-            echo"Not Register Not inserted to database";
-        }
-      
-        }
-        else{
-            $passnotmatch = " password not same";
-        }
-
-       }
-       
-      
-      
-      
+    if ($email === '') {
+        $emailerror = 'Empty email';
+        $hasError = true;
+    } 
     
-   
-   
+    elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $emailerror = 'Invalid email format';
+        $hasError = true;
+    }
+
+    if ($pass === '') {
+        $passworderror = 'Empty password';
+        $hasError = true;
+    } 
+    
+    
+    elseif (strlen($pass) < 4) {
+        $passworderror = 'Password must be at least 4 characters';
+        $hasError = true;
+    }
+
+
+    if ($confirmpass === '') {
+        $passnotmatch = 'Confirm password is required';
+        $hasError = true;
+    }
+
+
+
+
+
+    if (!$hasError) {
+        if ($pass === $confirmpass) {
+            $_SESSION['name'] = $name;
+            $_SESSION['lastname'] = $lastname;
+            $_SESSION['email'] = $email;
+            $_SESSION['createpassword'] = $pass;
+            $_SESSION['confirmpassword'] = $confirmpass;
+            $_SESSION['usertype'] = $usertype;
+
+
+            
+
+            try {
+                $stmt = mysqli_prepare($con, "INSERT INTO dbschool (names, lastname, email, pass, confirmpass, usertype) VALUES (?, ?, ?, ?, ?, ?)");
+                if (!$stmt) {
+                    throw new Exception('Prepare failed: ' . mysqli_error($con));
+                }
+
+
+                mysqli_stmt_bind_param($stmt, 'sssssi', $name, $lastname, $email, $pass, $confirmpass, $usertype);
+                $ok = mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+
+                if ($ok) {
+                    header('Location: logn.php');
+                    exit();
+                } 
+
+                else {
+                    $dberror = 'Unable to register user. Please try again.';
+                }
+            } 
+            
+            
+
+            catch (Exception $e) {
+                $msg = $e->getMessage();
+                $errno = mysqli_errno($con);
+
+                if (stripos($msg, "doesn't exist") !== false || $errno === 1146) {
+                    $createSql = "CREATE TABLE IF NOT EXISTS dbschool (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        names VARCHAR(191) NOT NULL,
+                        lastname VARCHAR(191) NOT NULL,
+                        email VARCHAR(255) NOT NULL UNIQUE,
+                        pass VARCHAR(255) NOT NULL,
+                        confirmpass VARCHAR(255) NOT NULL,
+                        usertype TINYINT(1) NOT NULL DEFAULT 0,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+
+
+                    try {
+                        mysqli_query($con, $createSql);
+                        $stmt = mysqli_prepare($con, "INSERT INTO dbschool (names, lastname, email, pass, confirmpass, usertype) VALUES (?, ?, ?, ?, ?, ?)");
+                        if ($stmt) {
+                            mysqli_stmt_bind_param($stmt, 'sssssi', $name, $lastname, $email, $pass, $confirmpass, $usertype);
+                            $ok = mysqli_stmt_execute($stmt);
+                            mysqli_stmt_close($stmt);
+                            if ($ok) {
+                                header('Location: logn.php');
+                                exit();
+                            } else {
+                                $dberror = 'Unable to register user after creating table.';
+                            }
+                        } 
+                        
+                        else {
+                            $dberror = 'Unable to prepare insert after creating table: ' . mysqli_error($con);
+                        }
+
+                    }
+                     catch (Exception $ce) {
+                        $dberror = 'Failed to create required table: ' . $ce->getMessage();
+                    }
+
+                } 
+                else {
+                  
+                    $dberror = 'Database error: ' . htmlspecialchars($msg);
+                }
+            }
+        } else {
+            $passnotmatch = 'Passwords do not match';
+        }
+    }
 }
 
 ?>
+
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -190,29 +278,42 @@ if(isset($_POST["register"])){
      <div class="form-container">
       <img src="/Images/logo.jpg" alt="logo">
         <h6>Sign Up</h6>
+        <?php if (!empty($dberror)): ?>
+            <div style="margin:10px 20px;padding:10px;border-radius:6px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;"> <?= htmlspecialchars($dberror) ?> </div>
+        <?php endif; ?>
+
 
         <form action="signup.php" method="post">
 
+
+
         <label for="name">Name</label> <br>
-        <input class="border border-2 border-black" type="text" name="name" id="name" placeholder="Enter Your Name" required>    <br>
+        <input class="border border-2 border-black" type="text" name="name" id="name" value="<?=htmlspecialchars($name)?>" placeholder="Enter Your Name">  
+         <span class="err"><?=htmlspecialchars($namerror)?></span><br><br>
+       
+
 
          <label for="lastname">Last Name</label> <br>
-        <input class="border border-2 border-black" type="text" name="lastname" id="lastname" placeholder="Enter Your Last Name" required>    <br>
+        <input class="border border-2 border-black" type="text" name="lastname" id="lastname" value="<?=htmlspecialchars($lastname)?>" placeholder="Enter Your Last Name"> 
+        <span class="err"><?=htmlspecialchars($lastnameerror)?></span>    <br><br>
+
 
 
         <label for="email">Username</label> <br>
-        <input class="border border-2 border-black" type="email" name="email" id="email" placeholder="Enter Email" required>
+        <input class="border border-2 border-black" type="email" name="email" id="email" value="<?=htmlspecialchars($email)?>" placeholder="Enter Email"> 
+        <span class="err"><?=htmlspecialchars($emailerror)?></span><br><br>
 
-        <br>
+
 
         <label for="pass">Password</label> <br>
-        <input class="border border-2 border-black" type="password" name="pass" id="pass" placeholder="Enter Password" required>
+        <input class="border border-2 border-black" type="password" name="pass" id="pass" placeholder="Enter Password"> <br>
+        <span class="err"><?=htmlspecialchars($passworderror)?></span><br>
 
-        <br>
+
 
         <label for="confirmpass">Confirm Password</label> <br>
-        <input class="border border-2 border-black" type="password" name="confirmpass" id="confirmpass" placeholder="Confirm Password" required> <br> <br>  
-
+        <input class="border border-2 border-black" type="password" name="confirmpass" id="confirmpass" placeholder="Confirm Password"> <br> <br>  
+        <span class="err"><?=htmlspecialchars($passnotmatch)?></span><br>
 
           <label>User Type:
             <select name="usertype" required>
@@ -222,10 +323,10 @@ if(isset($_POST["register"])){
       
         <br>
   
-        <button class="btn-create">Create Account</button>
+        <button class="btn btn-create" type="submit" name="btn-create">Create Account</button>
         
 
-         <p>Already have an account? <a href="logn.html"> Click Login!</p></a>
+         <p>Already have an account? <a href="logn.php"> Click Login!</a></p>
             </form>
      </div>
      </div>

@@ -1,5 +1,6 @@
 <?php
 session_start();
+include_once("../Database/connection.php");
 
 $email = $password = "";
 $emailerror = $passerror = "";
@@ -7,38 +8,71 @@ $emailnotregister = $passnotregister = $invalid = "";
 
 
 
-if(isset($_POST["login"])){
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
 
-    $useremail = $_POST["email"];
-    $userpassword = $_POST["password"];
+    $useremail = trim($_POST['email'] ?? '');
+    $userpassword = $_POST['password'] ?? '';
 
-    if(empty($useremail)){
-        $emailerror = "Empty Email";
-    }
-    elseif(empty($userpassword)){
-        $passerror = "Empty password";
-    }
-    elseif(empty($_SESSION["email"])){
-        $emailnotregister =  "No email register";
-    }
-    elseif (empty($_SESSION["createpassword"])){
-        $passnotregister = "no password register";
+    // server-side validation
+    if ($useremail === '') {
+        $emailerror = 'Empty Email';
     }
 
-    elseif($useremail ==  $_SESSION["email"] && $userpassword  == $_SESSION["createpassword"]) {
-      
-         if($_SESSION["usertype"] == 0){
-            header("location: index.php");
+    if ($userpassword === '') {
+        $passerror = 'Empty password';
+    }
+
+    // only check DB if no validation errors
+    if (empty($emailerror) && empty($passerror)) {
+        $stmt = mysqli_prepare($con, 'SELECT id, names, lastname, email, pass, usertype FROM dbschool WHERE email = ? LIMIT 1');
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, 's', $useremail);
+            mysqli_stmt_execute($stmt);
+            $res = mysqli_stmt_get_result($stmt);
+            $row = $res ? mysqli_fetch_assoc($res) : null;
+            mysqli_stmt_close($stmt);
+
+            if (!$row) {
+                $emailnotregister = 'No user registered with that email. Please sign up first.';
+            } else {
+                $dbPass = $row['pass'];
+                $dbUserType = (int)$row['usertype'];
+
+                // support hashed and plain passwords: try password_verify first
+                $passwordMatches = false;
+                if (password_verify($userpassword, $dbPass)) {
+                    $passwordMatches = true;
+                } elseif ($userpassword === $dbPass) {
+                    $passwordMatches = true;
+                }
+
+                if ($passwordMatches) {
+                    // set session and redirect
+                    $_SESSION['user_id'] = $row['id'];
+                    $_SESSION['email'] = $row['email'];
+                    $_SESSION['name'] = $row['names'];
+                    $_SESSION['lastname'] = $row['lastname'];
+                    $_SESSION['usertype'] = $dbUserType;
+
+                    if ($dbUserType === 0) {
+                        header('Location: ../Home.html');
+                        exit();
+                    } else {
+                        header('Location: ../admin/index.html');
+                        exit();
+                    }
+                } else {
+                    $invalid = 'Username or password invalid';
+                }
+            }
+        } else {
+            $emailnotregister = 'Database error: unable to check credentials.';
         }
-         elseif($_SESSION["usertype"] == 1){
-            header("location: ./adminFolder/dashboard.php");
     }
-  }
-else{
-    $invalid = "Username invalid ";
-}
 
 }
+
+
 
 
 
@@ -133,22 +167,31 @@ else{
      <div class="form-container">
          <img src="/Images/logo.jpg" alt="logo">
         <h6>Integrated School Management System</h6>
-        <form action="">
+        <form action="logn.php" method="post">
 
         <label for="email">Email</label> <br>
-        <input class="border border-2 border-black" type="email" name="email" id="email" placeholder="Enter Email" required>
+        <input class="border border-2 border-black" type="email" name="email" id="email" value="<?=htmlspecialchars($useremail ?? '')?>" placeholder="Enter Email">
+        <br><span class="err" style="color:#b02a37"><?=htmlspecialchars($emailerror ?? '')?></span>
 
         <br>
 
         <label for="pass">Password</label> <br>
-        <input class="border border-2 border-black" type="password" name="pass" id="pass" placeholder="Enter Password" required>
+        <input class="border border-2 border-black" type="password" name="password" id="pass" placeholder="Enter Password">
+        <br><span class="err" style="color:#b02a37"><?=htmlspecialchars($passerror ?? '')?></span>
 
        <br><br>
 
-        <button class="btn">Login</button>
+        <?php if (!empty($emailnotregister)): ?>
+            <div style="margin-bottom:10px;color:#b02a37"><?=htmlspecialchars($emailnotregister)?></div>
+        <?php endif; ?>
+        <?php if (!empty($invalid)): ?>
+            <div style="margin-bottom:10px;color:#b02a37"><?=htmlspecialchars($invalid)?></div>
+        <?php endif; ?>
+
+        <button class="btn" type="submit" name="login">Login</button>
         
 
-         <p>Don't have an account? <a href="signup.html">Sign Up!</p></a>
+         <p>Don't have an account? <a href="signup.php">Sign Up!</a></p>
             </form>
      </div>
      </div>
