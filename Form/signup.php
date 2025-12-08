@@ -228,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["btn-create"])) {
             padding: 5px;
             width: 240px;
         }
-         #confirmpasss{
+         #confirmpass{
             border-radius: 10px;
             padding: 5px;
             width: 240px;
@@ -276,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["btn-create"])) {
    <div class="flex">
 
      <div class="form-container">
-      <img src="/Images/logo.jpg" alt="logo">
+      <img src="../Images/logo.jpg" alt="logo">
         <h6>Sign Up</h6>
         <?php if (!empty($dberror)): ?>
             <div style="margin:10px 20px;padding:10px;border-radius:6px;background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;"> <?= htmlspecialchars($dberror) ?> </div>
@@ -289,31 +289,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST["btn-create"])) {
 
         <label for="name">Name</label> <br>
         <input class="border border-2 border-black" type="text" name="name" id="name" value="<?=htmlspecialchars($name)?>" placeholder="Enter Your Name">  
-         <span class="err"><?=htmlspecialchars($namerror)?></span><br><br>
+         <span class="err"><?=htmlspecialchars($namerror)?></span><br>
        
 
 
          <label for="lastname">Last Name</label> <br>
         <input class="border border-2 border-black" type="text" name="lastname" id="lastname" value="<?=htmlspecialchars($lastname)?>" placeholder="Enter Your Last Name"> 
-        <span class="err"><?=htmlspecialchars($lastnameerror)?></span>    <br><br>
+        <span class="err"><?=htmlspecialchars($lastnameerror)?></span>    <br>
 
 
 
         <label for="email">Username</label> <br>
         <input class="border border-2 border-black" type="email" name="email" id="email" value="<?=htmlspecialchars($email)?>" placeholder="Enter Email"> 
-        <span class="err"><?=htmlspecialchars($emailerror)?></span><br><br>
+        <span class="err"><?=htmlspecialchars($emailerror)?></span><br>
 
 
 
         <label for="pass">Password</label> <br>
         <input class="border border-2 border-black" type="password" name="pass" id="pass" placeholder="Enter Password"> <br>
-        <span class="err"><?=htmlspecialchars($passworderror)?></span><br>
+        <span class="err"><?=htmlspecialchars($passworderror)?></span>
 
 
 
         <label for="confirmpass">Confirm Password</label> <br>
-        <input class="border border-2 border-black" type="password" name="confirmpass" id="confirmpass" placeholder="Confirm Password"> <br> <br>  
-        <span class="err"><?=htmlspecialchars($passnotmatch)?></span><br>
+        <input class="border border-2 border-black" type="password" name="confirmpass" id="confirmpass" placeholder="Confirm Password"> <br> 
+        <span class="err"><?=htmlspecialchars($passnotmatch)?></span>
 
           <label>User Type:
             <select name="usertype" required>

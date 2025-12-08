@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
     $useremail = trim($_POST['email'] ?? '');
     $userpassword = $_POST['password'] ?? '';
 
-    // server-side validation
+
     if ($useremail === '') {
         $emailerror = 'Empty Email';
     }
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         $passerror = 'Empty password';
     }
 
-    // only check DB if no validation errors
+  
     if (empty($emailerror) && empty($passerror)) {
         $stmt = mysqli_prepare($con, 'SELECT id, names, lastname, email, pass, usertype FROM dbschool WHERE email = ? LIMIT 1');
         if ($stmt) {
@@ -32,8 +32,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
             $row = $res ? mysqli_fetch_assoc($res) : null;
             mysqli_stmt_close($stmt);
 
+          
             if (!$row) {
-                $emailnotregister = 'No user registered with that email. Please sign up first.';
+                $emailnotregister = 'No user registered';
             } else {
                 $dbPass = $row['pass'];
                 $dbUserType = (int)$row['usertype'];
@@ -55,10 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
                     $_SESSION['usertype'] = $dbUserType;
 
                     if ($dbUserType === 0) {
-                        header('Location: ../Home.html');
+                        header('Location: ../Home.php');
                         exit();
                     } else {
-                        header('Location: ../admin/index.html');
+                        header('Location: ../admin/index.php');
                         exit();
                     }
                 } else {
@@ -165,7 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
   <div class="flex">
 
      <div class="form-container">
-         <img src="/Images/logo.jpg" alt="logo">
+         <img src="../Images/logo.jpg" alt="logo">
         <h6>Integrated School Management System</h6>
         <form action="logn.php" method="post">
 
@@ -179,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login'])) {
         <input class="border border-2 border-black" type="password" name="password" id="pass" placeholder="Enter Password">
         <br><span class="err" style="color:#b02a37"><?=htmlspecialchars($passerror ?? '')?></span>
 
-       <br><br>
+       <br>
 
         <?php if (!empty($emailnotregister)): ?>
             <div style="margin-bottom:10px;color:#b02a37"><?=htmlspecialchars($emailnotregister)?></div>
