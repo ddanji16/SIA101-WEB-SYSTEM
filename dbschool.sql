@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 04, 2025 at 11:13 AM
+-- Generation Time: Dec 11, 2025 at 01:51 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -48,7 +48,19 @@ INSERT INTO `dbschool` (`id`, `names`, `lastname`, `email`, `pass`, `confirmpass
 (3, 'mark boss', 'mark@gmail.com', 'mark@gmail.com', '12345678', '12345678', 1, '2025-11-30 09:08:06'),
 (4, 'gusion', 'dela cruz', 'gus@gmail.com', '1234567', '1234567', 1, '2025-11-30 09:15:33'),
 (5, 'daniela', 'dela cruz', 'dann@gmail.com', '123456', '123456', 1, '2025-12-02 10:28:50'),
-(6, 'danjiii', 'dela cruz', 'danji@gmail.com', '123456', '123456', 0, '2025-12-02 10:29:55');
+(6, 'danjiii', 'dela cruz', 'danji@gmail.com', '123456', '123456', 0, '2025-12-02 10:29:55'),
+(7, 'jade ahahhahah', 'dela cruz', 'jade@gmail.com', '123456', '123456', 1, '2025-12-04 10:18:41'),
+(9, 'danielanthony', 'dela cruz', 'danski@gmail.com', '123456', '123456', 1, '2025-12-04 11:28:31'),
+(10, 'markmendoza', 'kupals', 'markz@gmail.com', '123456', '123456', 1, '2025-12-04 11:39:54'),
+(11, 'nana', 'haha', 'nana@gmail.com', '123456', '123456', 1, '2025-12-04 12:18:39'),
+(12, 'danjix', 'dela cruz', 'danjix@gmail.com', '123456', '123456', 1, '2025-12-04 12:37:05'),
+(13, 'danielaaa', 'delacruzzz', 'anthonydelac@gmail.com', '123456', '123456', 1, '2025-12-08 06:45:39'),
+(14, 'mark boss22', 'sssss', 'mark2@gmail.com', '123456', '123456', 0, '2025-12-08 06:48:36'),
+(15, 'dan11', 'dela cruz', 'gus11@gmail.s', '$2y$10$rPhv9zorOEh3tSOj8.tNsuSjnmrAfZGu1XhjbCp/vxlWuRZasgHX2', '', 0, '2025-12-08 07:20:19'),
+(17, 'Daniel Anthony', 'Dela Cruz', 'danjix1@gmail.com', '123456', '123456', 1, '2025-12-08 07:25:51'),
+(18, 'sam', 'jandel', 'sam@gmail.com', '123456', '123456', 0, '2025-12-08 07:27:50'),
+(19, 'daniela', 'dadadad', 'anthonydelac02@gmail.com', '123456', '123456', 1, '2025-12-10 07:40:53'),
+(20, 'admistrator', 'admin', 'admin@gmail.com', '123456', '123456', 1, '2025-12-10 21:26:23');
 
 -- --------------------------------------------------------
 
@@ -90,7 +102,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `dbschool`
 --
 ALTER TABLE `dbschool`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT for table `user`
